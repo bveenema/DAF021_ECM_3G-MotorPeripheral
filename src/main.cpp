@@ -13,6 +13,11 @@ AccelStepper RedMotor(AccelStepper::DRIVER, RED_STEP_PIN, RED_DIR_PIN);
 AccelStepper CoBlendMotor(AccelStepper::DRIVER, COBLED_STEP_PIN, COBLEND_DIR_PIN);
 
 
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
+
 void setup();
 void loop();
 void receiveEvent(int howMany);
@@ -146,58 +151,53 @@ void setup()
 	// Initialize Stepper Motors
 	pinMode(BLUE_STATUS_PIN, INPUT);
 	pinMode(BLUE_EN_PIN, OUTPUT);
+	digitalWrite(BLUE_EN_PIN, LOW); // Disable
 	BlueMotor.setPinsInverted(0,0,1);
 
 	pinMode(RED_STATUS_PIN, INPUT);
 	pinMode(RED_EN_PIN, OUTPUT);
+	digitalWrite(RED_EN_PIN, LOW); // Disable
 	RedMotor.setPinsInverted(0, 0, 1);
 
 	pinMode(COBLEND_STATUS_PIN, INPUT);
 	pinMode(COBLEND_EN_PIN, OUTPUT);
+	digitalWrite(COBLEND_EN_PIN, LOW); // Disable
 	CoBlendMotor.setPinsInverted(0, 0, 1);
-
-	BlueMotor.setAcceleration(10000);
-	BlueMotor.setMaxSpeed(3850);
-
-	RedMotor.setAcceleration(10000);
-	RedMotor.setMaxSpeed(3850);
-
-	BlueMotor.setCurrentPosition(0);
-	BlueMotor.moveTo(8000);
-
-	RedMotor.setCurrentPosition(0);
-	RedMotor.moveTo(8000);
 }
 
 // loop() runs over and over again, as quickly as it can execute.
 void loop()
 {
-	// Test Stepper Motors
-	static uint WaitTime = 0;
-	if(millis() - WaitTime > 2000)
-	{
-		BlueMotor.run();
-		RedMotor.run();
-	}
-		
+	// Update Stepper Motors
+	BlueMotor.run();
+	RedMotor.run();
+	CoBlendMotor.run();
+
+	// Monitor Distance to Go and Update MOVE Register
+	if(BlueMotor.distanceToGo() == 0)
+		bitClear(Registers[Motor_MOVE_Reg].value, 0);
+	if(BlueMotor.distanceToGo() == 0)
+		bitClear(Registers[Motor_MOVE_Reg].value, 1);
+	if(BlueMotor.distanceToGo() == 0)
+		bitClear(Registers[Motor_MOVE_Reg].value, 2);
+	
+	// Handle I2C Communications
 	if(FLAG_RegistersUpdated)
 	{
 		printUpdatedRegisters();
-
 		handleRegisterUpdates();
-
-		// Reset Flag
 		FLAG_RegistersUpdated = false;
 	}
 
-	static uint LastPrintTime = 0;
-	static uint counter = 0;
-	if(millis() - LastPrintTime > 1000)
-	{
-		Serial.printlnf("Counter: %d", counter);
-		counter += 1;
-		LastPrintTime = millis();
-	}
+	// Test Print
+	// static uint LastPrintTime = 0;
+	// static uint counter = 0;
+	// if(millis() - LastPrintTime > 1000)
+	// {
+	// 	Serial.printlnf("Counter: %d", counter);
+	// 	counter += 1;
+	// 	LastPrintTime = millis();
+	// }
 }
 
 void receiveEvent(int howMany)
@@ -289,6 +289,7 @@ void handleRegisterUpdates()
 		static Register PreviousMOVERegister = {0, true, false};
 		if((Registers[Motor_MOVE_Reg].value & 1) && !(PreviousMOVERegister.value & 1)) // Motor 1 Move bit was set
 		{
+			Serial.printlnf("Moving Motor 1");
 			// Update Speed and Acceleration
 			BlueMotor.setAcceleration(CalculateAcceleration(1));
 			BlueMotor.setMaxSpeed(CalculateMaxSpeed(1));
@@ -303,6 +304,7 @@ void handleRegisterUpdates()
 
 		if((Registers[Motor_MOVE_Reg].value & 2) && !(PreviousMOVERegister.value & 2)) // Motor 2 Move bit was set
 		{
+			Serial.printlnf("Moving Motor 2");
 			// Update Speed and Acceleration
 			RedMotor.setAcceleration(CalculateAcceleration(2));
 			RedMotor.setMaxSpeed(CalculateMaxSpeed(2));
