@@ -148,6 +148,10 @@ void setup()
 	Wire.onReceive(receiveEvent); // register event
 	Wire.onRequest(requestEvent); // register request handler
 
+	// Initialize Interrupt Pin
+	pinMode(MOTOR_INT_PIN, OUTPUT);
+	digitalWrite(MOTOR_INT_PIN, LOW);
+
 	// Initialize Stepper Motors
 	pinMode(BLUE_STATUS_PIN, INPUT);
 	pinMode(BLUE_EN_PIN, OUTPUT);
@@ -171,15 +175,26 @@ void loop()
 	// Update Stepper Motors
 	BlueMotor.run();
 	RedMotor.run();
-	CoBlendMotor.run();
 
 	// Monitor Distance to Go and Update MOVE Register
-	if(BlueMotor.distanceToGo() == 0)
-		bitClear(Registers[Motor_MOVE_Reg].value, 0);
-	if(BlueMotor.distanceToGo() == 0)
-		bitClear(Registers[Motor_MOVE_Reg].value, 1);
-	if(BlueMotor.distanceToGo() == 0)
-		bitClear(Registers[Motor_MOVE_Reg].value, 2);
+	static uint LastDistanceCheck = 0;
+	if(millis() - LastDistanceCheck > 100)
+	{
+		if(BlueMotor.distanceToGo() == 0)
+			bitClear(Registers[Motor_MOVE_Reg].value, 0);
+		if(RedMotor.distanceToGo() == 0)
+			bitClear(Registers[Motor_MOVE_Reg].value, 1);
+			
+		if(Registers[Motor_MOVE_Reg].value == 0)
+		{
+			pinSetFast(MOTOR_INT_PIN);
+		}
+		else
+		{
+			pinResetFast(MOTOR_INT_PIN);
+		}
+		LastDistanceCheck = millis();
+	}
 	
 	// Handle I2C Communications
 	if(FLAG_RegistersUpdated)
@@ -188,16 +203,6 @@ void loop()
 		handleRegisterUpdates();
 		FLAG_RegistersUpdated = false;
 	}
-
-	// Test Print
-	// static uint LastPrintTime = 0;
-	// static uint counter = 0;
-	// if(millis() - LastPrintTime > 1000)
-	// {
-	// 	Serial.printlnf("Counter: %d", counter);
-	// 	counter += 1;
-	// 	LastPrintTime = millis();
-	// }
 }
 
 void receiveEvent(int howMany)

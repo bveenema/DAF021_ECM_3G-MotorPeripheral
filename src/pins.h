@@ -10,6 +10,7 @@
 #define RED_DIR_PIN D7
 #define RED_EN_PIN D8
 
+#define MOTOR_INT_PIN A0
 #define COBLEND_EN_PIN A1
 #define COBLEND_DIR_PIN A2
 #define COBLED_STEP_PIN A3
