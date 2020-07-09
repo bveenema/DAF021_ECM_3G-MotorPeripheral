@@ -18,6 +18,7 @@ AccelStepper CoBlendMotor(AccelStepper::DRIVER, COBLED_STEP_PIN, COBLEND_DIR_PIN
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
+// Functions
 void setup();
 void loop();
 void receiveEvent(int howMany);
