@@ -50,7 +50,7 @@ Register Registers[NumRegisters] =
 	{0,true,false},		// Motor Enable Register
 	{0,true,false},		// Motor Direction Register (1: forward/pump, 0: backward/retract)
 	{0,true,false},		// Motor Move Register (1: if motor is to move, 0: if motor is to stop), Gets set to 0 if corresponding motor Enable register is set to 0, Gets set to 0 when move is complete
-	{0,false,false},	// Motor Error Register (1: if error, 0: if no error)
+	{0,false,false},	// Motor Error Register (1: if error, 0: if no error), Cleared when read
 	{0,true,false}, 	// Motor 1 Speed (1) High
 	{0,true,false},		// Motor 1 Speed (2)
 	{0,true,false},		// Motor 1 Speed (3)
@@ -178,24 +178,27 @@ void loop()
 	BlueMotor.run();
 	RedMotor.run();
 
-	// Monitor Distance to Go and Update MOVE Register
-	static uint LastDistanceCheck = 0;
-	if(millis() - LastDistanceCheck > 100)
+	// Monitor Motor
+	static uint LastMotorCheck = 0;
+	if(millis() - LastMotorCheck > 100)
 	{
 		if(BlueMotor.distanceToGo() == 0)
 			bitClear(Registers[Motor_MOVE_Reg].value, 0);
 		if(RedMotor.distanceToGo() == 0)
 			bitClear(Registers[Motor_MOVE_Reg].value, 1);
-			
-		if(Registers[Motor_MOVE_Reg].value == 0)
-		{
+
+		if(digitalRead(BLUE_STATUS_PIN))
+			bitSet(Registers[Motor_ERROR_Reg].value, 0);
+		if(digitalRead(RED_STATUS_PIN))
+			bitSet(Registers[Motor_ERROR_Reg].value, 1);
+		
+		// Set the interrupt pin if move is complete or position error has occured
+		if(Registers[Motor_MOVE_Reg].value == 0 || Registers[Motor_ERROR_Reg].value != 0)
 			digitalWrite(MOTOR_INT_PIN, HIGH);
-		}
 		else
-		{
 			digitalWrite(MOTOR_INT_PIN, LOW);
-		}
-		LastDistanceCheck = millis();
+
+		LastMotorCheck = millis();
 	}
 	
 	// Handle I2C Communications
@@ -240,10 +243,13 @@ void receiveEvent(int howMany)
 
 void requestEvent()
 {
-	// Return the register pointed to by the Register Pointer and advance the RP for subsequent reads
-	// sprintf(buffer, "Sending Register: %x, value: %d", rp, Registers[rp].value);
-	// Serial.println(buffer);
-	Wire.write(Registers[rp++].value);
+	// Return the register pointed to by the Register Pointer
+	Wire.write(Registers[rp].value);
+	if(rp == Motor_ERROR_Reg) // Clear Motor ERROR register after read
+		Registers[Motor_ERROR_Reg].value = 0;
+	
+	// Advance the register pointer
+	rp += 1;
 	if(rp > NumRegisters) rp = 0;
 }
 
@@ -340,6 +346,10 @@ void handleRegisterUpdates()
 		{
 			CoBlendMotor.stop();
 		}
+
+		// Clear the Interrupt pin if any motor is moving
+		if(Registers[Motor_MOVE_Reg].value != 0)
+			digitalWrite(MOTOR_INT_PIN, LOW);
 
 		PreviousMOVERegister = Registers[Motor_MOVE_Reg];
 
