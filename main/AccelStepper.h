@@ -240,7 +240,7 @@
 #define AccelStepper_h
 
 #include "math.h"
-#include "application.h"
+#include "Arduino.h"
 
 // These defs cause trouble on some versions of Arduino
 #undef round
@@ -337,7 +337,7 @@ public:
     /// to pin 5.
     /// \param[in] enable If this is true (the default), enableOutputs() will be called to enable
     /// the output pins at construction time.
-    AccelStepper(uint8_t interface = AccelStepper::FULL4WIRE, uint8_t pin1 = D2, uint8_t pin2 = D3, uint8_t pin3 = D4, uint8_t pin4 = D5, bool enable = true);
+    AccelStepper(uint8_t interface = AccelStepper::FULL4WIRE, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
 
     /// Alternate Constructor which will call your own functions for forward and backward steps.
     /// You can have multiple simultaneous steppers, all moving

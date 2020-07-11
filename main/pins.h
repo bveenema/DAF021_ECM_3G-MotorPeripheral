@@ -2,13 +2,13 @@
 #define PINS_H
 
 // Argon Pins
-#define BLUE_STEP_PIN D2
-#define BLUE_DIR_PIN D3
-#define BLUE_EN_PIN D4
-#define RED_STATUS_PIN D5
-#define RED_STEP_PIN D6
-#define RED_DIR_PIN D7
-#define RED_EN_PIN D8
+#define BLUE_STEP_PIN 5
+#define BLUE_DIR_PIN 6
+#define BLUE_EN_PIN 9
+#define RED_STATUS_PIN 10
+#define RED_STEP_PIN 11
+#define RED_DIR_PIN 12
+#define RED_EN_PIN 13
 
 #define MOTOR_INT_PIN A0
 #define COBLEND_EN_PIN A1

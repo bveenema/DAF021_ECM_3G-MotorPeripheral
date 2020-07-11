@@ -4,7 +4,7 @@
  * Author:
  */
 
-#include "Particle.h"
+#include <Wire.h>
 #include "pins.h"
 #include "AccelStepper.h"
 
@@ -30,7 +30,8 @@ int CalculateTargetPosition(const uint motorNum);
 int CalculateAcceleration(const uint motorNum);
 int CalculateMaxSpeed(const uint motorNum);
 
-SYSTEM_MODE(MANUAL);
+// sprintf Buffer
+char buffer[255];
 
 /// Register Definition
 //	Register Qualitiies:
@@ -188,11 +189,11 @@ void loop()
 			
 		if(Registers[Motor_MOVE_Reg].value == 0)
 		{
-			pinSetFast(MOTOR_INT_PIN);
+			digitalWrite(MOTOR_INT_PIN, HIGH);
 		}
 		else
 		{
-			pinResetFast(MOTOR_INT_PIN);
+			digitalWrite(MOTOR_INT_PIN, LOW);
 		}
 		LastDistanceCheck = millis();
 	}
@@ -240,7 +241,8 @@ void receiveEvent(int howMany)
 void requestEvent()
 {
 	// Return the register pointed to by the Register Pointer and advance the RP for subsequent reads
-	// Serial.printlnf("Sending Register: %x, value: %d", rp, Registers[rp].value);
+	// sprintf(buffer, "Sending Register: %x, value: %d", rp, Registers[rp].value);
+	// Serial.println(buffer);
 	Wire.write(Registers[rp++].value);
 	if(rp > NumRegisters) rp = 0;
 }
@@ -252,8 +254,8 @@ void printUpdatedRegisters()
 	{
 		if(Registers[i].updated)
 		{
-			if(i < 16) Serial.printlnf("0x0%x: %d", i, Registers[i].value);
-			else Serial.printlnf("0x%x: %d", i, Registers[i].value);
+			sprintf(buffer, "0x%s%x: %d", (i<16) ? "0":"", i, Registers[i].value);
+			Serial.println(buffer);
 		}
 	}
 	Serial.println("----------------");
@@ -263,8 +265,8 @@ void printRegister(uint8_t reg)
 {
 	Serial.println("----------------\nRegister:");
 
-	if(reg < 16) Serial.printlnf("0x0%x: %d", reg, Registers[reg].value);
-	else Serial.printlnf("0x%x: %d", reg, Registers[reg].value);
+	sprintf(buffer, "0x%s%x: %d", (reg<16) ? "0":"", reg, Registers[reg].value);
+	Serial.println(buffer); 
 
 	Serial.println("----------------");
 }
@@ -295,7 +297,8 @@ void handleRegisterUpdates()
 		static Register PreviousMOVERegister = {0, true, false};
 		if((Registers[Motor_MOVE_Reg].value & 1) && !(PreviousMOVERegister.value & 1)) // Motor 1 Move bit was set
 		{
-			Serial.printlnf("Moving Motor 1");
+			sprintf(buffer, "Moving Motor 1");
+			Serial.println();
 			// Update Speed and Acceleration
 			BlueMotor.setAcceleration(CalculateAcceleration(1));
 			BlueMotor.setMaxSpeed(CalculateMaxSpeed(1));
@@ -310,7 +313,8 @@ void handleRegisterUpdates()
 
 		if((Registers[Motor_MOVE_Reg].value & 2) && !(PreviousMOVERegister.value & 2)) // Motor 2 Move bit was set
 		{
-			Serial.printlnf("Moving Motor 2");
+			sprintf(buffer, "Moving Motor 2");
+			Serial.println();
 			// Update Speed and Acceleration
 			RedMotor.setAcceleration(CalculateAcceleration(2));
 			RedMotor.setMaxSpeed(CalculateMaxSpeed(2));
@@ -373,7 +377,9 @@ int CalculateTargetPosition(const uint motorNum)
 
 	// Get the direction bit
 	bool dir = Registers[Motor_DIR_Reg].value & (1 << (motorNum-1));
-	Serial.printlnf("Direction: %s", (dir) ? "Forward" : "Backward");
+
+	sprintf(buffer, "Direction: %s", (dir) ? "Forward" : "Backward");
+	Serial.println(buffer);
 
 	// compensate position for direction bit
 	if(    (MotorForwardDirection[motorNum-1] == 1 && dir == 0)  // if forward direction is clockwise and requested direction is backward
@@ -381,8 +387,9 @@ int CalculateTargetPosition(const uint motorNum)
 	{
 		target = -target;
 	}
-				
-	Serial.printlnf("New Target: %d", target);
+	
+	sprintf(buffer, "New Target: %d", target);
+	Serial.println(buffer);
 
 	return target;
 }
@@ -406,8 +413,9 @@ int CalculateAcceleration(const uint motorNum)
 	acceleration |= Registers[reg++].value << 16;
 	acceleration |= Registers[reg++].value << 8;
 	acceleration |= Registers[reg].value;
-				
-	Serial.printlnf("Acceleration: %d", acceleration);
+
+	sprintf(buffer, "Acceleration: %d", acceleration);			
+	Serial.println(buffer);
 
 	return acceleration;
 }
@@ -431,8 +439,9 @@ int CalculateMaxSpeed(const uint motorNum)
 	speed |= Registers[reg++].value << 16;
 	speed |= Registers[reg++].value << 8;
 	speed |= Registers[reg].value;
-				
-	Serial.printlnf("Speed: %d", speed);
+	
+	sprintf(buffer, "Speed: %d", speed);
+	Serial.println(buffer);
 
 	return speed;
 }
