@@ -304,7 +304,7 @@ void handleRegisterUpdates()
 		if((Registers[Motor_MOVE_Reg].value & 1) && !(PreviousMOVERegister.value & 1)) // Motor 1 Move bit was set
 		{
 			sprintf(buffer, "Moving Motor 1");
-			Serial.println();
+			Serial.println(buffer);
 			// Update Speed and Acceleration
 			BlueMotor.setAcceleration(CalculateAcceleration(1));
 			BlueMotor.setMaxSpeed(CalculateMaxSpeed(1));
@@ -314,13 +314,14 @@ void handleRegisterUpdates()
 		}
 		else if(!(Registers[Motor_MOVE_Reg].value & 1) && (PreviousMOVERegister.value & 1)) // Motor 1 Move bit was cleared
 		{
+			Serial.println("\nSTOP MOTOR 1");
 			BlueMotor.stop();
 		}
 
 		if((Registers[Motor_MOVE_Reg].value & 2) && !(PreviousMOVERegister.value & 2)) // Motor 2 Move bit was set
 		{
 			sprintf(buffer, "Moving Motor 2");
-			Serial.println();
+			Serial.println(buffer);
 			// Update Speed and Acceleration
 			RedMotor.setAcceleration(CalculateAcceleration(2));
 			RedMotor.setMaxSpeed(CalculateMaxSpeed(2));
@@ -330,6 +331,7 @@ void handleRegisterUpdates()
 		}
 		else if(!(Registers[Motor_MOVE_Reg].value & 2) && (PreviousMOVERegister.value & 2)) // Motor 2 Move bit was cleared
 		{
+			Serial.println("\nSTOP MOTOR 2");
 			RedMotor.stop();
 		}
 
