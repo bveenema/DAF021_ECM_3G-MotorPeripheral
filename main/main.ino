@@ -28,7 +28,7 @@ void printRegister(uint8_t reg);
 void handleRegisterUpdates();
 int CalculateTargetPosition(const uint motorNum);
 int CalculateAcceleration(const uint motorNum);
-int CalculateMaxSpeed(const uint motorNum);
+float CalculateMaxSpeed(const uint motorNum);
 
 // sprintf Buffer
 char buffer[255];
@@ -143,7 +143,7 @@ bool FLAG_RegistersUpdated = false;
 void setup()
 {
 	// Initialize Serial
-	Serial.begin(57000);
+	Serial.begin(57600);
 
 	// Initialize I2C
 	Wire.begin(4);                // join i2c bus with address #4
@@ -432,7 +432,7 @@ int CalculateAcceleration(const uint motorNum)
 	return acceleration;
 }
 
-int CalculateMaxSpeed(const uint motorNum)
+float CalculateMaxSpeed(const uint motorNum)
 {
 	// Determine the starting register, motor must be 1,2 or 3, anything else is invalid
 	uint reg = 0;
@@ -452,8 +452,12 @@ int CalculateMaxSpeed(const uint motorNum)
 	speed |= Registers[reg++].value << 8;
 	speed |= Registers[reg].value;
 	
+	float fspeed = (float)speed/1000;
+
 	sprintf(buffer, "Speed: %d", speed);
 	Serial.println(buffer);
+	Serial.println(fspeed);
+	Serial.flush();
 
-	return speed;
+	return fspeed;
 }
