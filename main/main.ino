@@ -41,52 +41,53 @@ struct Register
 {
 	char value; // the current value of the register
 	bool rw; // 0: read-only, 1: Writable
-	bool updated; // 1: was updated 
+	bool updated; // 1: was updated
+	char name[16]; // the name of the register
 };
 uint32_t rp = 0; // points to most recently receieved register
 const uint32_t NumRegisters = 41;
 Register Registers[NumRegisters] = 
 {
-	{0,true,false},		// Motor Enable Register
-	{0,true,false},		// Motor Direction Register (1: forward/pump, 0: backward/retract)
-	{0,true,false},		// Motor Move Register (1: if motor is to move, 0: if motor is to stop), Gets set to 0 if corresponding motor Enable register is set to 0, Gets set to 0 when move is complete
-	{0,false,false},	// Motor Error Register (1: if error, 0: if no error), Cleared when read
-	{0,true,false}, 	// Motor 1 Speed (1) High
-	{0,true,false},		// Motor 1 Speed (2)
-	{0,true,false},		// Motor 1 Speed (3)
-	{0,true,false},		// Motor 1 Speed (4) Low
-	{0,true,false},  	// Motor 1 Acceleration (1) High
-	{0,true,false},  	// Motor 1 Acceleration (2)
-	{0,true,false},  	// Motor 1 Acceleration (3)
-	{0,true,false},  	// Motor 1 Acceleration (4) Low
-	{0,true,false},		// Motor 1 Steps (1) High
-	{0,true,false},		// Motor 1 Steps (2)
-	{0,true,false},		// Motor 1 Steps (3)
-	{0,true,false},		// Motor 1 Steps (4) Low
-	{0,true,false}, 	// Motor 2 Speed (1) High
-	{0,true,false},		// Motor 2 Speed (2)
-	{0,true,false},		// Motor 2 Speed (3)
-	{0,true,false},		// Motor 2 Speed (4) Low
-	{0,true,false},  	// Motor 2 Acceleration (1) High
-	{0,true,false},  	// Motor 2 Acceleration (2)
-	{0,true,false},  	// Motor 2 Acceleration (3)
-	{0,true,false},  	// Motor 2 Acceleration (4) Low
-	{0,true,false},		// Motor 2 Steps (1) High
-	{0,true,false},		// Motor 2 Steps (2)
-	{0,true,false},		// Motor 2 Steps (3)
-	{0,true,false},		// Motor 2 Steps (4) Low
-	{0,true,false}, 	// Motor 3 Speed (1) High
-	{0,true,false},		// Motor 3 Speed (2)
-	{0,true,false},		// Motor 3 Speed (3)
-	{0,true,false},		// Motor 3 Speed (4) Low
-	{0,true,false},  	// Motor 3 Acceleration (1) High
-	{0,true,false},  	// Motor 3 Acceleration (2)
-	{0,true,false},  	// Motor 3 Acceleration (3)
-	{0,true,false},  	// Motor 3 Acceleration (4) Low
-	{0,true,false},		// Motor 2 Steps (1) High
-	{0,true,false},		// Motor 2 Steps (2)
-	{0,true,false},		// Motor 2 Steps (3)
-	{0,true,false},		// Motor 2 Steps (4) Low
+	{0,true,false, "Enable"},			// Motor Enable Register
+	{0,true,false, "Direction"},		// Motor Direction Register (1: forward/pump, 0: backward/retract)
+	{0,true,false, "Move"},				// Motor Move Register (1: if motor is to move, 0: if motor is to stop), Gets set to 0 if corresponding motor Enable register is set to 0, Gets set to 0 when move is complete
+	{0,false,false, "Error"},			// Motor Error Register (1: if error, 0: if no error), Cleared when read
+	{0,true,false, "M1 Speed 1"}, 		// Motor 1 Speed (1) High
+	{0,true,false, "M1 Speed 2"},		// Motor 1 Speed (2)
+	{0,true,false, "M1 Speed 3"},		// Motor 1 Speed (3)
+	{0,true,false, "M1 Speed 4"},		// Motor 1 Speed (4) Low
+	{0,true,false, "M1 Accel 1"},  		// Motor 1 Acceleration (1) High
+	{0,true,false, "M1 Accel 2"},  		// Motor 1 Acceleration (2)
+	{0,true,false, "M1 Accel 3"},  		// Motor 1 Acceleration (3)
+	{0,true,false, "M1 Accel 4"},  		// Motor 1 Acceleration (4) Low
+	{0,true,false, "M1 Steps 1"},		// Motor 1 Steps (1) High
+	{0,true,false, "M1 Steps 2"},		// Motor 1 Steps (2)
+	{0,true,false, "M1 Steps 3"},		// Motor 1 Steps (3)
+	{0,true,false, "M1 Steps 4"},		// Motor 1 Steps (4) Low
+	{0,true,false, "M2 Speed 1"}, 		// Motor 2 Speed (1) High
+	{0,true,false, "M2 Speed 2"},		// Motor 2 Speed (2)
+	{0,true,false, "M2 Speed 3"},		// Motor 2 Speed (3)
+	{0,true,false, "M2 Speed 4"},		// Motor 2 Speed (4) Low
+	{0,true,false, "M2 Accel 1"},  		// Motor 2 Acceleration (1) High
+	{0,true,false, "M2 Accel 2"},  		// Motor 2 Acceleration (2)
+	{0,true,false, "M2 Accel 3"},  		// Motor 2 Acceleration (3)
+	{0,true,false, "M2 Accel 4"},  		// Motor 2 Acceleration (4) Low
+	{0,true,false, "M2 Steps 1"},		// Motor 2 Steps (1) High
+	{0,true,false, "M2 Steps 2"},		// Motor 2 Steps (2)
+	{0,true,false, "M2 Steps 3"},		// Motor 2 Steps (3)
+	{0,true,false, "M2 Steps 4"},		// Motor 2 Steps (4) Low
+	{0,true,false, "M3 Speed 1"}, 		// Motor 3 Speed (1) High
+	{0,true,false, "M3 Speed 2"},		// Motor 3 Speed (2)
+	{0,true,false, "M3 Speed 3"},		// Motor 3 Speed (3)
+	{0,true,false, "M3 Speed 4"},		// Motor 3 Speed (4) Low
+	{0,true,false, "M3 Accel 1"},  		// Motor 3 Acceleration (1) High
+	{0,true,false, "M3 Accel 2"},  		// Motor 3 Acceleration (2)
+	{0,true,false, "M3 Accel 3"},  		// Motor 3 Acceleration (3)
+	{0,true,false, "M3 Accel 4"},  		// Motor 3 Acceleration (4) Low
+	{0,true,false, "M3 Steps 1"},		// Motor 3 Steps (1) High
+	{0,true,false, "M3 Steps 2"},		// Motor 3 Steps (2)
+	{0,true,false, "M3 Steps 3"},		// Motor 3 Steps (3)
+	{0,true,false, "M3 Steps 4"},		// Motor 3 Steps (4) Low
 };
 
 enum MotorDriverRegister
@@ -260,7 +261,7 @@ void printUpdatedRegisters()
 	{
 		if(Registers[i].updated)
 		{
-			sprintf(buffer, "0x%s%x: %d", (i<16) ? "0":"", i, Registers[i].value);
+			sprintf(buffer, "0x%s%x: %d (%s)", (i<16) ? "0":"", i, Registers[i].value, Registers[i].name);
 			Serial.println(buffer);
 		}
 	}
