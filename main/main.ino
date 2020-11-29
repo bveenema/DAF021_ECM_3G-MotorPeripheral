@@ -300,6 +300,9 @@ void handleRegisterUpdates()
 	// Move Register initiates a new move or stops a move if the bit is changed
 	if(Registers[Motor_MOVE_Reg].updated)
 	{
+		// Clear the updated bit
+		Registers[Motor_EN_Reg].updated = false;
+
 		static Register PreviousMOVERegister = {0, true, false};
 		if((Registers[Motor_MOVE_Reg].value & 1) && !(PreviousMOVERegister.value & 1)) // Motor 1 Move bit was set
 		{
@@ -354,9 +357,6 @@ void handleRegisterUpdates()
 			digitalWrite(MOTOR_INT_PIN, LOW);
 
 		PreviousMOVERegister = Registers[Motor_MOVE_Reg];
-
-		// Clear the updated bit
-		Registers[Motor_EN_Reg].updated = false;
 	}
 
 	// Step, Acceleration and Speed registers are ignored until move command is issued
